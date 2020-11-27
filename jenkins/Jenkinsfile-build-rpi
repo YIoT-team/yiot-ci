@@ -43,6 +43,7 @@ def DockerRunner(cmd, logfile){
 
 pipeline    {
 //    agent { node { label "${BUILD_HOST}"} }
+    agent { any }
     environment {
         LAST_STAGE_NAME = ""
         SUMMARY_STATE="PROJECT: ${currentBuild.fullDisplayName}\n.   AUTOMATION: ${CI_BRANCH}\n.   PROJECT: ${YIOT_BRANCH}\n. COMMENT: ${BUILD_COMMENT}\n\n"
