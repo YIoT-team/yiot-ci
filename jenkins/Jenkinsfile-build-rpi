@@ -125,7 +125,7 @@ pipeline    {
                     LAST_STAGE_NAME="${STAGE_NAME}"
                     
                     print_info_header("Build linux binary")   
-                    DockerRunner("jenkins/build-tool.sh - linux", "build-linux.log")
+                    DockerRunner("jenkins/build-tool.sh -t linux", "build-linux.log")
 
                     ConcatState(LAST_STAGE_NAME,"OK")                    
                 }
