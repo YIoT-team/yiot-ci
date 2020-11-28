@@ -155,7 +155,7 @@ pipeline    {
         always {
             print_info_header("Cleanup")
             script {
-                sh "sudo docker exec -u jenkins ${env.BASE_CONTAINER_NAME} bash -c \'sudo chown -R jenkins ${env.CONTAINER_PROJECT_ROOT}\' || true"
+                sh "sudo docker exec -u jenkins ${env.BASE_CONTAINER_NAME} bash -c \'sudo chown -R jenkins.jenkins ${env.CONTAINER_PROJECT_ROOT}\' || true"
                 sh "sudo docker rm -f ${env.BASE_CONTAINER_NAME} || true"
                 sh "sudo docker volume prune -f || true"
             }
