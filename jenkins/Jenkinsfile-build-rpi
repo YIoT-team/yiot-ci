@@ -117,21 +117,18 @@ pipeline    {
 //        }
 
 
-//        stage('Building Linux x64') {
-//            steps {
-//                script {
-//                    LAST_STAGE_NAME="${STAGE_NAME}"
-//                    
-//                    print_info_header("Build linux binary")   
-//                    DockerRunner("./virgil-messenger-qt/scripts/build-linux.sh", "build-linux.log")
-//
-//                    print_info_header("Archiving linux binary file")
-//                    DockerRunner("cp -rf virgil-messenger-qt/release/qmake.linux-g++/DistributionKit/* artifacts/linux", "build-linux.log")
-//                    
-//                    ConcatState(LAST_STAGE_NAME,"OK")                    
-//                }
-//            }
-//        }
+        stage('Building Linux') {
+            steps {
+                script {
+                    LAST_STAGE_NAME="${STAGE_NAME}"
+                    
+                    print_info_header("Build linux binary")   
+                    DockerRunner("jenkins/build-tool.sh - linux", "build-linux.log")
+
+                    ConcatState(LAST_STAGE_NAME,"OK")                    
+                }
+            }
+        }
 
 //        stage('Archive artifacts') {
 //            steps {
