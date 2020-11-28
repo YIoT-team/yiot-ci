@@ -3,6 +3,7 @@
 #   Global variables
 #
 
+set -e
 SCRIPT_FOLDER="$(cd $(dirname "$0") && pwd)"
 
 #***************************************************************************************
@@ -54,6 +55,7 @@ build_linux() {
     print_message " Remove old build directory"
     rm -rf "${SOURCE_DIR}/build" || true
     mkdir -p "${SOURCE_DIR}/build"
+    export QTDIR=/opt/Qt/5.15.0/gcc_64
     pushd "${SOURCE_DIR}/build"
        cmake -DKS_PLATFORM="linux" -DGO_DISABLE=ON -DBUILD_APP_ENABLE=OFF ..
        make
