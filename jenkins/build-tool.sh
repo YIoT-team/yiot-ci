@@ -58,7 +58,7 @@ build_linux() {
     export QTDIR=/opt/Qt/5.15.0/gcc_64
     pushd "${SOURCE_DIR}/build"
        cmake -DKS_PLATFORM="linux" -DGO_DISABLE=ON -DBUILD_APP_ENABLE=OFF ..
-       make
+       make yiot-device-app-linux
     popd
 }
 
