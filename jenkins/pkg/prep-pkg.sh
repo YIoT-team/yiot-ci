@@ -13,7 +13,7 @@ PACKAGE_NAME=${PACKAGE_NAME:-"yiot-rpi"}
 
 PROJ_DIR="${1}"
 
-VERSION="$(cat ${PROJ_DIR}/VERSION_MESSENGER | tr -d '\n')"
+#VERSION="$(cat ${PROJ_DIR}/VERSION_MESSENGER | tr -d '\n')"
 
 MAJOR_VER="0"
 MINOR_VER="1"
