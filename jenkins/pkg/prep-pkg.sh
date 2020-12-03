@@ -18,11 +18,17 @@ PROJ_DIR="${1}"
 MAJOR_VER="0"
 MINOR_VER="1"
 SUB_VER="0"
-BUILD_VER="${BUILD_VER:-0}"
+BUILD_VER="${BUILD_NUMBER:-0}"
 
 PKG_SRC_NAME="${PACKAGE_NAME}-${MAJOR_VER}.${MINOR_VER}.${SUB_VER}"
 
 export MAJOR_VER MINOR_VER SUB_VER BUILD_VER
+
+print_message() {
+    echo "====================="
+    echo "=== $@"
+    echo "====================="
+}
 
 ############################################################################################
 echo_info() {
@@ -46,7 +52,7 @@ create_dirs() {
 prep_sources() {
    mkdir -p ${BUILD_PATH}/${PKG_SRC_NAME}/dist
    cp -rf ${PROJ_DIR}/build/device-app/main/linux/yiot-device-app-linux ${BUILD_PATH}/${PKG_SRC_NAME}/dist
-   cp -rf ${PROJ_DIR}/develop/device-app/main/linux/scripts/* ${BUILD_PATH}/${PKG_SRC_NAME}/dist
+   cp -rf ${PROJ_DIR}/device-app/main/linux/scripts/* ${BUILD_PATH}/${PKG_SRC_NAME}/dist
 }
 
 ############################################################################################
@@ -106,8 +112,10 @@ docker_cp() {
 ############################################################################################
 build_deb() {
  pushd ${BUILD_PATH}/sdeb/
+   export OS=raspbian
+   export ARCH=armhf
    print_message "Initialization pbuilder root"   
-   pbuilder create --distribution buster
+   pbuilder create --distribution buster --debootstrapopts "--keyring=/usr/share/keyrings/raspbian-archive-keyring.gpg"
 
    print_message "Update pbuilder root"   
    pbuilder --update
