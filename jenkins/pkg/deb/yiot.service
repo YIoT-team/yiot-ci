@@ -1,0 +1,12 @@
+[Unit]
+Description=yiot daemon
+After=network-online.target firewalld.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/yiot
+ExecStart=/opt/yiot/pc/yiot-device-app-linux
+
+[Install]
+WantedBy=multi-user.target
