@@ -82,7 +82,7 @@ pipeline    {
 
                     // Run container
                     print_info_header("Run Base container")
-                    sh "sudo docker run -d --rm --cap-add SYS_PTRACE --name ${BASE_CONTAINER_NAME} \
+                    sh "sudo docker run -d --rm --privileged --name ${BASE_CONTAINER_NAME} \
                      -e LD_LIBRARY_PATH=/usr/lib \
                      -e BUILD_UID=\$(id -u) \
                      -e BUILD_GID=\$(id -g) \
