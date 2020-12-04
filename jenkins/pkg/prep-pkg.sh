@@ -53,6 +53,7 @@ prep_sources() {
    mkdir -p ${BUILD_PATH}/${PKG_SRC_NAME}/dist
    cp -rf ${PROJ_DIR}/build/device-app/main/linux/yiot-device-app-linux ${BUILD_PATH}/${PKG_SRC_NAME}/dist
    cp -rf ${PROJ_DIR}/device-app/main/linux/scripts/* ${BUILD_PATH}/${PKG_SRC_NAME}/dist
+   cp -rf ${SCRIPT_PATH}/deb/*.service ${BUILD_PATH}/${PKG_SRC_NAME}/dist
 }
 
 ############################################################################################
@@ -115,13 +116,13 @@ build_deb() {
    export OS=raspbian
    export ARCH=armhf
    print_message "Initialization pbuilder root"   
-   pbuilder create --distribution buster --debootstrapopts "--keyring=/usr/share/keyrings/raspbian-archive-keyring.gpg"
+   sudo pbuilder create --mirror http://mirror.truenetwork.ru/raspbian/raspbian/ --debug --distribution buster --debootstrapopts "--keyring=/usr/share/keyrings/raspbian-archive-keyring.gpg"
 
    print_message "Update pbuilder root"   
-   pbuilder --update
+   sudo pbuilder --update --debug --mirror http://mirror.truenetwork.ru/raspbian/raspbian/ 
    
    print_message "Building DEB package"      
-   pbuilder --build $(ls *.dsc)
+   sudo pbuilder --debug --mirror http://mirror.truenetwork.ru/raspbian/raspbian/ --build $(ls *.dsc)
    
    print_message "Copy results fro mcontainer"
    cp -f /var/cache/pbuilder/result/*.deb ${BUILD_PATH}/linux
@@ -129,13 +130,28 @@ build_deb() {
 }
 
 ############################################################################################
+
+############################################################################################
+build_quick_deb() {
+    pushd ${BUILD_PATH}/sdeb
+	mkdir -p build
+	tar xJf *.tar.xz --directory build/
+	tar xzf *.tar.gz --strip 1 --directory build/
+	pushd ${BUILD_PATH}/sdeb/build
+	    dpkg-buildpackage -rfakeroot -b -uc -us
+	popd
+    popd
+
+}
+############################################################################################
+
 echo_info
 create_dirs
 
 pushd ${BUILD_PATH} 
   prep_sources
   create_sdeb
-  build_deb
+  build_quick_deb
 popd
 echo "------ END PREPARING SRPMS"
 exit 0

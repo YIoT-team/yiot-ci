@@ -127,23 +127,24 @@ pipeline    {
                     print_info_header("Build linux binary")   
                     DockerRunner("jenkins/build-tool.sh -t linux", "build-linux.log")
                     DockerRunner("jenkins/pkg/prep-pkg.sh /home/build/yiot", "build-linux.log")
+                    DockerRunner("cp -f jenkins/pkg/build/sdeb/*.deb artifacts", "build-linux.log")                    
 
                     ConcatState(LAST_STAGE_NAME,"OK")                    
                 }
             }
         }
 
-//        stage('Archive artifacts') {
-//            steps {
-//                script {
-//                    LAST_STAGE_NAME="${STAGE_NAME}"
-//                    print_info_header("${LAST_STAGE_NAME}")
-//                    writeFile file: 'artifacts/summary.log', text: "${SUMMARY_STATE}"
-//                    archiveArtifacts('artifacts/**/*')
-//                    ConcatState(LAST_STAGE_NAME,"OK")                    
-//                }
-//            }
-//        }
+        stage('Archive artifacts') {
+            steps {
+                script {
+                    LAST_STAGE_NAME="${STAGE_NAME}"
+                    print_info_header("${LAST_STAGE_NAME}")
+                    writeFile file: 'artifacts/summary.log', text: "${SUMMARY_STATE}"
+                    archiveArtifacts('artifacts/**/*')
+                    ConcatState(LAST_STAGE_NAME,"OK")                    
+                }
+            }
+        }
 
     }
 
