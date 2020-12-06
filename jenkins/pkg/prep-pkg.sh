@@ -51,11 +51,17 @@ create_dirs() {
 ############################################################################################
 prep_sources() {
    mkdir -p ${BUILD_PATH}/${PKG_SRC_NAME}/dist
-   cp -rf ${PROJ_DIR}/build/device-app/main/linux/yiot-device-app-linux ${BUILD_PATH}/${PKG_SRC_NAME}/dist
+
    cp -rf ${PROJ_DIR}/device-app/main/linux/scripts/* ${BUILD_PATH}/${PKG_SRC_NAME}/dist
    cp -rf ${SCRIPT_PATH}/deb/*.service ${BUILD_PATH}/${PKG_SRC_NAME}/dist
    cp -rf ${SCRIPT_PATH}/deb/*.service ${BUILD_PATH}/${PKG_SRC_NAME}/dist   
-   cp -rf ${PROJ_DIR}/build/device-app/main/linux/bluez-dbus/*.so* ${BUILD_PATH}/${PKG_SRC_NAME}/dist   
+
+   cp -rf ${PROJ_DIR}/build/device-app/main/linux/yiot-device-app-linux ${BUILD_PATH}/${PKG_SRC_NAME}/dist   
+   cp -rf ${PROJ_DIR}/build/device-app/main/linux/bluez-dbus/libbluez-dbus-cpp.so* ${BUILD_PATH}/${PKG_SRC_NAME}/dist   
+   cp -rf ${PROJ_DIR}/build/common/iotkit/modules/crypto/converters/libconverters.so ${BUILD_PATH}/${PKG_SRC_NAME}/dist   
+   cp -rf ${PROJ_DIR}/build/depends/installed/lib/libsdbus-c++.so* ${BUILD_PATH}/${PKG_SRC_NAME}/dist   
+   
+   
 }
 
 ############################################################################################
