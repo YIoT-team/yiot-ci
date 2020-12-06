@@ -35,7 +35,7 @@ def print_info_header(message) {
 
 def DockerRunner(cmd, logfile){
     cmd_docker = "sudo docker exec -u \$(id -u) ${BASE_CONTAINER_NAME} bash -c "
-    cmd_prefix = "cd ${CONTAINER_PROJECT_ROOT} && "
+    cmd_prefix = "\' cd ${CONTAINER_PROJECT_ROOT} && "
     cmd_postfix = " 2>&1 | tee ${CONTAINER_PROJECT_ROOT}/artifacts/${logfile}; exit \${PIPESTATUS[0]}\'"
     sh "${cmd_docker} ${cmd_prefix} ${cmd} ${cmd_postfix}"
 }
