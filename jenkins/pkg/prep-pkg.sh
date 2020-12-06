@@ -54,6 +54,8 @@ prep_sources() {
    cp -rf ${PROJ_DIR}/build/device-app/main/linux/yiot-device-app-linux ${BUILD_PATH}/${PKG_SRC_NAME}/dist
    cp -rf ${PROJ_DIR}/device-app/main/linux/scripts/* ${BUILD_PATH}/${PKG_SRC_NAME}/dist
    cp -rf ${SCRIPT_PATH}/deb/*.service ${BUILD_PATH}/${PKG_SRC_NAME}/dist
+   cp -rf ${SCRIPT_PATH}/deb/*.service ${BUILD_PATH}/${PKG_SRC_NAME}/dist   
+   cp -rf ${PROJ_DIR}/build/device-app/main/linux/bluez-dbus/*.so* ${BUILD_PATH}/${PKG_SRC_NAME}/dist   
 }
 
 ############################################################################################
