@@ -7,8 +7,8 @@ Wants=network-online.target
 Type=simple
 WorkingDirectory=/opt/yiot
 ExecStart=/opt/yiot/pc/yiot-device-app-linux
-StandardOutput=/var/log/yiot-device.log
-StandardError=/var/log/yiot-device-error.log
+StandardOutput=file:/var/log/yiot-device.log
+StandardError=file:/var/log/yiot-device-error.log
 
 [Install]
 WantedBy=multi-user.target
