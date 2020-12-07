@@ -9,6 +9,7 @@ WorkingDirectory=/opt/yiot
 ExecStart=/opt/yiot/pc/yiot-device-app-linux
 StandardOutput=file:/var/log/yiot-device.log
 StandardError=file:/var/log/yiot-device-error.log
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
