@@ -31,10 +31,10 @@ print_usage() {
   echo "$(basename ${0})"
   echo
   echo "  -s < Source directory >"
-  echo "  -t < Target OS  >"
-  echo "  -c < Customer  >"
-  echo "  -l < notarization login  >"
-  echo "  -p < notarization password  >"
+  echo "  -i < Image path  >"
+  echo "  -p < DEB package  >"
+  echo "  -a < Install additional packages  >"
+  echo "  -s < Increase image size (MB)  >"
   echo "  -h"
   exit 0
 }
