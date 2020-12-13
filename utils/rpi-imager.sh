@@ -340,6 +340,7 @@ find_tool losetup || FIND_RES=1
 find_tool partprobe || FIND_RES=1
 find_tool qemu-arm-static || FIND_RES=1
 find_tool basename || FIND_RES=1
+find_tool systemd-nspawn || FIND_RES=1
 if [ "${FIND_RES}" == "1" ]; then
  print_message "Please install required tools"
  exit 127
