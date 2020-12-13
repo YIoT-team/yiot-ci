@@ -30,14 +30,31 @@ print_error() {
 print_usage() {
   echo
   echo "$(basename ${0}) < resize | shell | mount | umount | install > <parameters>"
+
   echo
-  echo "  Parameters:"
-  echo "  -s < Source directory >"
-  echo "  -i < Image path  >"
-  echo "  -p < DEB package  >"
-  echo "  -a < Install additional packages names >"
-  echo "  -s < Increase image size (MB)  >"
-  echo "  -h"
+  echo "Usage:"
+  echo "- Resize image:"
+  echo "  $(basename ${0}) resize -s <increase size in Mb"  
+
+  echo
+  echo "- Run shell:"  
+  echo "  $(basename ${0}) shell -i <RPI image path>" 
+  
+  echo
+  echo "- Mounting image fs:"  
+  echo "  $(basename ${0}) mount -i <RPI image path>"   
+
+  echo
+  echo "- Unmounting image fs:"  
+  echo "  $(basename ${0}) umount"
+  
+  echo
+  echo "- Install packages:"  
+  echo "  $(basename ${0}) install -i <RPI image path> -p <custom DEB package path> -a <Additional stantart packages list"    
+
+  echo
+  echo "- Print help:"  
+  echo "  $(basename ${0}) help"
   exit 0
 }
 ############################################################################################
@@ -47,7 +64,7 @@ print_usage() {
 ############################################################################################
 GLOB_LODEVICE=""
 GLOB_PARTNAME=""
-ARG_RPIIMAGE="2020-08-20-raspios-buster-armhf-lite.img"
+#ARG_RPIIMAGE="2020-08-20-raspios-buster-armhf-lite.img"
 MAIN_COMMAND="${1}"
 shift
 if [ ! "${MAIN_COMMAND}" ] || [ "${MAIN_COMMAND}" == "help" ]; then
@@ -287,6 +304,32 @@ cmd_shell() {
 }
 
 ############################################################################################
+cmd_install() {
+    print_title "Installing packages"
+    if [ -z "${ARG_PACKAGE}" ] && [ -z "${ARG_ADDPACKAGES}" ]; then
+      print_message "ERROR: packages not specified"
+      exit 127
+    fi
+
+    cmd_mount
+    
+    if [ ! -z "${ARG_ADDPACKAGES}" ]; then
+	print_message "Installing: [${ARG_ADDPACKAGES}]"
+	exec_nspawn "apt-get -y update && apt-get -y install ${ARG_ADDPACKAGES}"	
+    fi
+
+    if [ ! -z "${ARG_PACKAGE}" ]; then
+	print_message "Installing: [${ARG_PACKAGE}]"
+	mkdir -p "${SCRIPT_DIRECTORY}/mnt/root/pkg"
+	cp -f "${ARG_PACKAGE}" "${SCRIPT_DIRECTORY}/mnt/root/pkg"
+	PACKAGE_NAME="$(basename ${ARG_PACKAGE})"
+	exec_nspawn "apt-get -y update && dpkg -i /root/pkg/${PACKAGE_NAME} && apt-get install -f"	
+	rm -rf "${SCRIPT_DIRECTORY}/mnt/root/pkg"
+    fi
+    cmd_umount
+}
+
+############################################################################################
 print_title "Detecting tools"
 find_tool losetup || FIND_RES=1
 find_tool parted || FIND_RES=1
@@ -296,6 +339,7 @@ find_tool dd || FIND_RES=1
 find_tool losetup || FIND_RES=1
 find_tool partprobe || FIND_RES=1
 find_tool qemu-arm-static || FIND_RES=1
+find_tool basename || FIND_RES=1
 if [ "${FIND_RES}" == "1" ]; then
  print_message "Please install required tools"
  exit 127
