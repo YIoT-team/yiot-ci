@@ -29,13 +29,13 @@ print_error() {
 ############################################################################################
 print_usage() {
   echo
-  echo "$(basename ${0}) < resize | shell | install > <parameters>"
+  echo "$(basename ${0}) < resize | shell | mount | umount | install > <parameters>"
   echo
   echo "  Parameters:"
   echo "  -s < Source directory >"
   echo "  -i < Image path  >"
   echo "  -p < DEB package  >"
-  echo "  -a < Install additional packages  >"
+  echo "  -a < Install additional packages names >"
   echo "  -s < Increase image size (MB)  >"
   echo "  -h"
   exit 0
@@ -73,6 +73,18 @@ while [ -n "$1" ]
    esac
    shift
 done
+
+############################################################################################
+find_tool() {
+    local PARAM_CMD="${1}"
+    RES_TMP="$(which ${PARAM_CMD} 2>&1)"
+    if [ "${?}" != "0" ]; then
+	echo "Tools [${PARAM_CMD}] NOT FOUND (Please install first)"
+	return 127
+    fi
+    return 0
+}
+
 ############################################################################################
 parse_values() {
     local PARAM_VALUES=${1}
@@ -138,31 +150,35 @@ mount_image() {
 }
 ############################################################################################
 mount_fs() {
-    local PARAM_PART="${1}"
-    print_message "Mounting FS (${PARAM_PART})"
-    TMP_RES="$(umount -l "${SCRIPT_DIRECTORY}/mnt" 2>&1 >>/dev/null)"
+    print_message "Mounting FS (${GLOB_PARTNAME}) ${SCRIPT_DIRECTORY}/mnt"
+    umount_fs
     rm -rf mnt
     mkdir -p mnt
-    mount ${PARAM_PART} mnt
+    mount ${GLOB_PARTNAME} mnt
     RET_RES="${?}"
     if [ "${RET_RES}" != "0" ]; then
-    print_error "${RET_RES}" "Error mounting ${PARAM_PART}"
-	umount_image "${LO_DEVICE}"
+	print_error "${RET_RES}" "Error mounting ${PARAM_PART}"
+	umount_image
 	return "${RET_RES}"
     fi
 }
 
 ############################################################################################
-umount_image() {
-    PARAM_RETURN=""
-    print_message "Unmounting image and fs"
-    print_message "Unmounting FS"    
+umount_fs() {
     RES_TMP=$(umount  "${SCRIPT_DIRECTORY}/mnt" 2>&1 >>/dev/null)
     if [ "${?}" != "0" ]; then
 	RES_TMP=$(umount -l "${SCRIPT_DIRECTORY}/mnt" 2>&1 >>/dev/null)
     fi    
+}
 
-    print_title "Unmounting image"
+############################################################################################
+umount_image() {
+    PARAM_RETURN=""
+    print_message "Unmounting"
+    print_message "Unmounting FS"    
+    umount_fs    
+
+    print_message "Unmounting image"
     local UMOUNT_MSG="$(losetup -d "${GLOB_LODEVICE}" 2>&1 )"
     local RET_RES="${?}"
     if [ "${RET_RES}" != "0" ]; then 
@@ -239,24 +255,78 @@ cmd_increase_image() {
     fi  
     sync  
     umount_image
+    print_message "Process finish"
     exit 0
 }
 
 ############################################################################################
+cmd_mount() {
+    print_title "Mounting image to ${SCRIPT_DIRECTORY}/mnt"
+    mount_image 
+    [ "${?}" != "0" ] && exit 127
+    mount_fs
+    [ "${?}" != "0" ] && exit 127
+    print_message "Process finish"
+    exit 0    
+}
+
+############################################################################################
+cmd_umount() {
+    print_title "Unmounting ${SCRIPT_DIRECTORY}/mnt"
+    TMP_RES=$(umount "${SCRIPT_DIRECTORY}/mnt" 2>&1)
+    RET_RES="${?}"
+    if [ "${RET_RES}" != "0" ]; then
+        print_error "${TMP_RES}" "Error unmounting"
+        exit 127
+    fi  
+    losetup -D
+    print_message "Process finish"
+    exit 0    
+}
+
+############################################################################################
+cmd_shell() {
+    print_title "Executing shell"
+    mount_image 
+    [ "${?}" != "0" ] && exit 127
+    mount_fs
+    [ "${?}" != "0" ] && exit 127
+    print_message "Process finish"
+    exit 0
+}
+
+############################################################################################
+print_title "Detecting tools"
+find_tool losetup || FIND_RES=1
+find_tool parted || FIND_RES=1
+find_tool mount || FIND_RES=1
+find_tool resize2fs || FIND_RES=1
+find_tool dd || FIND_RES=1
+find_tool losetup || FIND_RES=1
+find_tool partprobe || FIND_RES=1
+find_tool qemu-arm-static || FIND_RES=1
+if [ "${FIND_RES}" == "1" ]; then
+ print_message "Please install required tools"
+ exit 127
+else
+ print_message "OK" 
+fi
 
 case "${MAIN_COMMAND}" in
      resize) 	cmd_increase_image
         	;;
-     -p) PACKAGE="$2"
-         shift
-         ;;
-     -a) ADD_PACKAGES="$2"
-         shift
-         ;;
+     shell) 	cmd_shell
+    		;;
+     mount) 	cmd_mount
+    		;;
+     umount) 	cmd_umount
+    		;;    		
      -s) INCR_SIZE="$2"
          shift
          ;;
-     *) print_usage;;
+     *) print_usage
+        exit 0
+        ;;
 esac
 exit 0
 
