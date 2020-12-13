@@ -194,7 +194,7 @@ exec_nspawn() {
     local PARAM_CMD="${1}"
     print_title "Execute command in container"
     
-    systemd-nspawn -D "${SCRIPT_DIRECTORY}/mnt" /bin/bash -c "${PARAM_CMD}"
+    systemd-nspawn -D "${SCRIPT_DIRECTORY}/mnt" /bin/bash -i -c "${PARAM_CMD}"
 
     local RET_RES="${?}"
     if [ "${RET_RES}" != "0" ]; then 
@@ -255,8 +255,6 @@ cmd_increase_image() {
     fi  
     sync  
     umount_image
-    print_message "Process finish"
-    exit 0
 }
 
 ############################################################################################
@@ -266,8 +264,6 @@ cmd_mount() {
     [ "${?}" != "0" ] && exit 127
     mount_fs
     [ "${?}" != "0" ] && exit 127
-    print_message "Process finish"
-    exit 0    
 }
 
 ############################################################################################
@@ -280,19 +276,14 @@ cmd_umount() {
         exit 127
     fi  
     losetup -D
-    print_message "Process finish"
-    exit 0    
 }
 
 ############################################################################################
 cmd_shell() {
     print_title "Executing shell"
-    mount_image 
-    [ "${?}" != "0" ] && exit 127
-    mount_fs
-    [ "${?}" != "0" ] && exit 127
-    print_message "Process finish"
-    exit 0
+    cmd_mount
+    bash -i -c "systemd-nspawn -M RPI -D ${SCRIPT_DIRECTORY}/mnt"
+    cmd_umount
 }
 
 ############################################################################################
@@ -321,39 +312,11 @@ case "${MAIN_COMMAND}" in
     		;;
      umount) 	cmd_umount
     		;;    		
-     -s) INCR_SIZE="$2"
-         shift
-         ;;
-     *) print_usage
-        exit 0
-        ;;
+     install)   cmd_install
+    		;;    	     
+     *) 	print_usage
+    		;;
 esac
+
+print_message "Process finish"
 exit 0
-
-
-# Increase image size
-if [ ! -z "${INCR_SIZE}" ]; then
-    increase_image "${ARG_RPIIMAGE}" "${INCR_SIZE}"
-    if [ "${?}" != "0" ]; then
-        exit 127
-    fi
-fi
-
-# Mounting image, fs
-mount_image ${ARG_RPIIMAGE}
-RET_RES="${?}"
-if [ "${RET_RES}" != "0" ]; then
-    print_error "${RET_RES}" "Error mounting"
-    exit  127
-fi
-
-LODEVICE="${PARAM_RETURN_LODEVICE}"
-PARTITION="${PARAM_RETURN_PARTITION}"
-
-
-exit 0
-exec_nspawn "ls /"
-
-umount_image "${PARAM_RETURN_LODEVICE}"
-echo "Retres $?"
-
