@@ -41,6 +41,10 @@ print_usage() {
   echo "  $(basename ${0}) shell -i <RPI image path>" 
   
   echo
+  echo "- Exec command:"  
+  echo "  $(basename ${0}) exec -c <command>" 
+  
+  echo
   echo "- Mounting image fs:"  
   echo "  $(basename ${0}) mount -i <RPI image path>"   
 
@@ -87,6 +91,9 @@ while [ -n "$1" ]
      -s) ARG_INCRSIZE="$2"
          shift
          ;;
+     -c) ARG_COMMAND="$2"
+         shift
+         ;;         
    esac
    shift
 done
@@ -113,11 +120,6 @@ parse_values() {
         echo "${PAIR_VALUE}"
       fi
     done
-}
-
-############################################################################################
-detect_part() {
- echo
 }
 
 ############################################################################################
@@ -330,6 +332,26 @@ cmd_install() {
 }
 
 ############################################################################################
+cmd_exec() {
+    print_title "Execute command"
+    if [ -z "${ARG_COMMAND}" ]; then
+      print_message "ERROR: command not specified"
+      exit 127
+    fi
+
+    cmd_mount
+    exec_nspawn "${ARG_COMMAND}"	
+    RET_RES="${?}"
+    if [ "${RET_RES}" != "0" ]; then
+        cmd_umount
+        exit 127
+    fi      
+    cmd_umount
+}
+
+
+
+############################################################################################
 print_title "Detecting tools"
 find_tool losetup || FIND_RES=1
 find_tool parted || FIND_RES=1
@@ -353,6 +375,8 @@ case "${MAIN_COMMAND}" in
         	;;
      shell) 	cmd_shell
     		;;
+     exec) 	cmd_exec
+    		;;    		
      mount) 	cmd_mount
     		;;
      umount) 	cmd_umount
