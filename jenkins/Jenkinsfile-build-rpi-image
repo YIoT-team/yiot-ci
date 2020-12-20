@@ -101,13 +101,24 @@ pipeline    {
                 }
             }
         }        
+
+        stage('Archiving IMG') {
+            steps {
+                script {
+                    LAST_STAGE_NAME="${STAGE_NAME}"
+                    print_info_header("Upload to cdn")   
+                    sh "cd build && rm -f *.zip && RPI_IMG=\$(ls *.img) && zip -r \${RPI_IMG%.*}.zip \${RPI_IMG} && rm -f *.img  2>&1 | tee -a ${workspace}/artifacts/upload-image.log; exit \${PIPESTATUS[0]}"
+                    ConcatState(LAST_STAGE_NAME,"OK")                    
+                }
+            }
+        }                
         
         stage('Upload to cdn') {
             steps {
                 script {
                     LAST_STAGE_NAME="${STAGE_NAME}"
                     print_info_header("Upload to cdn")   
-                    sh "RPI_IMG=\$(ls build/*.img); utils/push-artifacts.sh  \${RPI_IMG} images/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-image.log; exit \${PIPESTATUS[0]}"
+                    sh "RPI_IMG=\$(ls build/*.zip); utils/push-artifacts.sh  \${RPI_IMG} images/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-image.log; exit \${PIPESTATUS[0]}"
                     ConcatState(LAST_STAGE_NAME,"OK")                    
                 }
             }
