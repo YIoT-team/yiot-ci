@@ -71,8 +71,8 @@ pipeline    {
                 script {
                     LAST_STAGE_NAME="${STAGE_NAME}"
                     print_info_header("Downloading image")   
-//                    sh "cd build && wget -c ${env.RPI_IMAGE_URL}  2>&1 | tee -a artifacts/download-image.log; exit \${PIPESTATUS[0]}"
-                    sh "cd build && wget -c ${env.RPI_IMAGE_URL}"
+                    sh "cd build ; wget -c ${env.RPI_IMAGE_URL}  2>&1 | tee -a artifacts/download-image.log; exit \${PIPESTATUS[0]}"
+//                    sh "cd build && wget -c ${env.RPI_IMAGE_URL}"
                     ConcatState(LAST_STAGE_NAME,"OK")                    
                 }
             }
@@ -94,7 +94,7 @@ pipeline    {
                 script {
                     LAST_STAGE_NAME="${STAGE_NAME}"
                     print_info_header("Unzip image")   
-                    sh "cd build && unzip *.zip  2>&1 | tee -a artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}"
+                    sh "cd build ; unzip *.zip  2>&1 | tee -a artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}"
                     print_info_header("Installing pkgs")   
                     sh "DEB_PKG=\$(ls build/artifacts/*.deb|grep -v dbgsym); RPI_IMG=\$(ls build/*.img); utils/rpi-imager.sh -i buid/\${RPI_IMG} -p build/artifacts/\${DEB_PKG}  2>&1 | tee -a artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}"
                     ConcatState(LAST_STAGE_NAME,"OK")                    
