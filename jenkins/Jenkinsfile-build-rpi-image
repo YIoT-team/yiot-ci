@@ -96,7 +96,7 @@ pipeline    {
                     print_info_header("Unzip image")   
                     sh "cd build ; unzip *.zip  2>&1 | tee -a ${workspace}/artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}"
                     print_info_header("Installing pkgs")   
-                    sh "DEB_PKG=\$(ls build/artifacts/*.deb|grep -v dbgsym); RPI_IMG=\$(ls build/*.img); utils/rpi-imager.sh install -i buid/\${RPI_IMG} -p build/artifacts/\${DEB_PKG}  2>&1 | tee -a ${workspace}/artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}"
+                    sh "DEB_PKG=\$(ls build/artifacts/*.deb|grep -v dbgsym); RPI_IMG=\$(ls build/*.img); utils/rpi-imager.sh install -i \${RPI_IMG} -p \${DEB_PKG}  2>&1 | tee -a ${workspace}/artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}"
                     ConcatState(LAST_STAGE_NAME,"OK")                    
                 }
             }
@@ -107,7 +107,7 @@ pipeline    {
                 script {
                     LAST_STAGE_NAME="${STAGE_NAME}"
                     print_info_header("Upload to cdn")   
-                    sh "RPI_IMG=\$(ls build/*.img); utils/push-artifacts.sh  buid/\${RPI_IMG} images/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-image.log; exit \${PIPESTATUS[0]}"
+                    sh "RPI_IMG=\$(ls build/*.img); utils/push-artifacts.sh  \${RPI_IMG} images/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-image.log; exit \${PIPESTATUS[0]}"
                     ConcatState(LAST_STAGE_NAME,"OK")                    
                 }
             }
