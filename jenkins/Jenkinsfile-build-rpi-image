@@ -45,7 +45,7 @@ pipeline    {
     agent { node { label "${BUILD_HOST}"} }
     environment {
         LAST_STAGE_NAME = ""
-        SUMMARY_STATE="PROJECT: ${currentBuild.fullDisplayName}\n.   AUTOMATION: ${CI_BRANCH}\n.   PROJECT: ${YIOT_BRANCH}\n.  DEB FROM: ${JOB_NUMBER}\n.  COMMENT: ${BUILD_COMMENT}\n\n"
+        SUMMARY_STATE="PROJECT: ${currentBuild.fullDisplayName}\n.   AUTOMATION: ${CI_BRANCH}\n.   DEB FROM: ${JOB_NUMBER}\n.  COMMENT: ${BUILD_COMMENT}\n\n"
         BASE_IMAGE = "harbor.localnet/yiot/raspios-buster-devel"
         BASE_CONTAINER_NAME = "${env.JOB_NAME}-${env.BUILD_NUMBER}"
         CONTAINER_PROJECT_ROOT = "/home/build"
