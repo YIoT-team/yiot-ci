@@ -54,7 +54,7 @@ print_usage() {
   
   echo
   echo "- Install packages:"  
-  echo "  $(basename ${0}) install -i <RPI image path> -p <custom DEB package path> -a <Additional stantart packages list"    
+  echo "  $(basename ${0}) install -i <RPI image path> -p <custom DEB package path> -a <Additional stantart packages list> -e"    
 
   echo
   echo "- Print help:"  
@@ -69,6 +69,7 @@ print_usage() {
 GLOB_LODEVICE=""
 GLOB_PARTNAME=""
 #ARG_RPIIMAGE="2020-08-20-raspios-buster-armhf-lite.img"
+IGNORE_ERR="0"
 MAIN_COMMAND="${1}"
 shift
 if [ ! "${MAIN_COMMAND}" ] || [ "${MAIN_COMMAND}" == "help" ]; then
@@ -94,6 +95,8 @@ while [ -n "$1" ]
      -c) ARG_COMMAND="$2"
          shift
          ;;         
+     -e) IGNORE_ERR="1"
+         ;;                  
    esac
    shift
 done
@@ -318,6 +321,11 @@ cmd_install() {
     if [ ! -z "${ARG_ADDPACKAGES}" ]; then
 	print_message "Installing: [${ARG_ADDPACKAGES}]"
 	exec_nspawn "apt-get -y update && apt-get -y install ${ARG_ADDPACKAGES}"	
+	local RET_RES="${?}"
+	if [ "${RET_RES}" != "0" ] && [ "${IGNORE_ERR}" != "1" ]; then 
+	    cmd_umount	
+	    exit 127
+	fi    	
     fi
 
     if [ ! -z "${ARG_PACKAGE}" ]; then
@@ -326,7 +334,12 @@ cmd_install() {
 	cp -f "${ARG_PACKAGE}" "${SCRIPT_DIRECTORY}/mnt/root/pkg"
 	PACKAGE_NAME="$(basename ${ARG_PACKAGE})"
 	exec_nspawn "apt-get -y update && dpkg -i /root/pkg/${PACKAGE_NAME} && apt-get install -f"	
+	local RET_RES="${?}"
 	rm -rf "${SCRIPT_DIRECTORY}/mnt/root/pkg"
+	if [ "${RET_RES}" != "0" ] && [ "${IGNORE_ERR}" != "1" ]; then 
+	    cmd_umount	
+	    exit 127
+	fi    
     fi
     cmd_umount
 }
