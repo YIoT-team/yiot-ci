@@ -8,6 +8,12 @@ DST_DIR="${2}"
 ############################################################################################
 echo "### Upload zip to bintray"
 rsync -avrlz --password-file=${HOME}/.rsync ${SRC_FILES} rsync://ftp@harbor.localnet/ftp/${DST_DIR}/
-echo "### ALL OPERATION DONE"
+RET_RES="${?}"
+if [ "${RET_RES}" == "0" ]; then
+    echo "### ALL OPERATION DONE"
+else
+    echo "### ERROR RES:[${RET_RES}]"
+fi
+
 ############################################################################################
 
