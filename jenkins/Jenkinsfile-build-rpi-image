@@ -119,7 +119,7 @@ pipeline    {
                     LAST_STAGE_NAME="${STAGE_NAME}"
                     print_info_header("Upload to cdn")   
                     sh "RPI_IMG=\$(ls build/*.zip); utils/push-artifacts.sh  \${RPI_IMG} images/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-image.log; exit \${PIPESTATUS[0]}"
-                    sh "DEB_PKG=\$(ls build/artifacts/*.deb|grep -v dbgsym); utils/push-artifacts.sh  \${"DEB_PKG} images/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-image.log; exit \${PIPESTATUS[0]}"                    
+                    sh "DEB_PKG=\$(ls build/artifacts/*.deb|grep -v dbgsym); utils/push-artifacts.sh  \${DEB_PKG} images/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-image.log; exit \${PIPESTATUS[0]}"                    
                     ConcatState(LAST_STAGE_NAME,"OK")                    
                 }
             }
