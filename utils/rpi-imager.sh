@@ -171,9 +171,9 @@ mount_image() {
 mount_fs() {
     print_message "Mounting FS (${GLOB_PARTNAME}) ${SCRIPT_DIRECTORY}/mnt"
     umount_fs
-    rm -rf mnt
-    mkdir -p mnt
-    mount ${GLOB_PARTNAME} mnt
+    rm -rf ${SCRIPT_DIRECTORY}/mnt
+    mkdir -p ${SCRIPT_DIRECTORY}/mnt
+    mount ${GLOB_PARTNAME} ${SCRIPT_DIRECTORY}/mnt
     RET_RES="${?}"
     if [ "${RET_RES}" != "0" ]; then
 	print_error "${RET_RES}" "Error mounting ${PARAM_PART}"
