@@ -108,7 +108,7 @@ pipeline    {
                     LAST_STAGE_NAME="${STAGE_NAME}"
 		    if ( RESET_PI_PASSWD == "true" ) {
                         print_info_header("${LAST_STAGE_NAME}")
-                	sh "sudo utils/rpi-imager.sh exec -i \${RPI_IMG} -c 'passwd -d pi' 2>&1 | tee -a ${workspace}/artifacts/resetpasswd-image.log; exit \${PIPESTATUS[0]}"
+                	sh "RPI_IMG=\$(ls build/*.img); sudo utils/rpi-imager.sh exec -i \${RPI_IMG} -c 'passwd -d pi' 2>&1 | tee -a ${workspace}/artifacts/resetpasswd-image.log; exit \${PIPESTATUS[0]}"
                         ConcatState(LAST_STAGE_NAME,"OK")
                     } else  {
                         ConcatState(LAST_STAGE_NAME,"SKIPPED")
