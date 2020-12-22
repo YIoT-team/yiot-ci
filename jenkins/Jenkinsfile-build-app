@@ -1,0 +1,141 @@
+// Functions
+
+def ConcatState(Stage,State) {
+    SUMMARY_STATE="${SUMMARY_STATE}  STAGE: ${Stage} - ${State}\n"
+}
+
+def mailNotification() {
+    step([$class: 'Mailer',
+          notifyEveryUnstableBuild: true,
+          recipients: "root@localhost",
+          sendToIndividuals: true])
+}
+
+def clearContentUnix() {
+    cleanWs()
+}
+
+def archiveArtifacts(pattern) {
+    step([$class: 'ArtifactArchiver', artifacts: pattern, fingerprint: true, onlyIfSuccessful: false])
+}
+
+def DiscordSetHook() {
+    if ( currentBuild.result == "SUCCESS" ) {
+        return "diskord-jenkins-report"
+    } else {
+        return "diskord-jenkins-report"
+    }
+}
+
+def print_info_header(message) {
+    echo "#---------------------------------------"
+    echo "#---> ${message}"
+    echo "#---------------------------------------"
+}
+
+def DockerRunner(cmd, logfile){
+    cmd_docker = "sudo docker exec --tty -u \$(id -u) ${BASE_CONTAINER_NAME} bash -c "
+    cmd_prefix = "\' cd ${CONTAINER_PROJECT_ROOT} && "
+    cmd_postfix = " 2>&1 | tee ${CONTAINER_PROJECT_ROOT}/artifacts/${logfile}; exit \${PIPESTATUS[0]}\'"
+    sh "${cmd_docker} ${cmd_prefix} ${cmd} ${cmd_postfix}"
+}
+
+
+pipeline    {
+    agent { node { label "${BUILD_HOST}"} }
+    environment {
+        LAST_STAGE_NAME = ""
+        SUMMARY_STATE="PROJECT: ${currentBuild.fullDisplayName}\n.   AUTOMATION: ${CI_BRANCH}\n.   PROJECT: ${YIOT_BRANCH}\n. COMMENT: ${BUILD_COMMENT}\n\n"
+        BUILD_OPTS = " "
+    }
+
+    stages {
+        stage('Grab SCM') {
+            steps {
+                script {
+                    LAST_STAGE_NAME="${STAGE_NAME}"
+                    clearContentUnix()
+                    checkout scm
+                    sh "mkdir -p artifacts"
+                    checkout([$class: 'GitSCM',
+                                      branches: [[name: '${YIOT_BRANCH}']],
+                                      doGenerateSubmoduleConfigurations: false,
+                                      extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false],[$class: 'RelativeTargetDirectory', relativeTargetDir: 'yiot']],
+                                      submoduleCfg: [],
+                                      userRemoteConfigs: [[credentialsId: 'yiot-bot', url: 'https://github.com/YIoT-team/YIoT.git']]])
+                    ConcatState(LAST_STAGE_NAME,"OK")
+                }
+            }
+        }
+
+        stage('Building Android') {
+            steps {
+                script {
+                    LAST_STAGE_NAME="${STAGE_NAME}"
+                    print_info_header("Build Android apk")   
+		    withCredentials([file(credentialsId: 'android-key', variable: 'VS_KEYCHAIN'), 
+				     string(credentialsId: 'android-keychain-passwd', variable: 'VS_KEYCHAIN_PASSWORD'), 
+				     string(credentialsId: 'android-key-passwd', variable: 'VS_KEY_PASSWORD')]) {
+                	sh "yiot/scripts/android-release.sh"				     
+                	sh "cp -f yiot/build/all/android-build/*.apk artifacts/
+		    }
+                    ConcatState(LAST_STAGE_NAME,"OK")                    
+                }
+            }
+        }
+
+        stage('Archive artifacts') {
+            steps {
+                script {
+                    LAST_STAGE_NAME="${STAGE_NAME}"
+                    print_info_header("${LAST_STAGE_NAME}")
+                    writeFile file: 'artifacts/summary.log', text: "${SUMMARY_STATE}"
+                    archiveArtifacts('artifacts/**/*')
+                    ConcatState(LAST_STAGE_NAME,"OK")                    
+                }
+            }
+        }
+
+    }
+
+////
+//// Post procedure
+////
+
+    post {
+        always {
+            print_info_header("Report")
+            script {
+                // Send message to Discord
+                if ( DISKORD_NOTIFY == "true" ) {
+                    try {
+                        withCredentials([string(credentialsId: DiscordSetHook(), variable: 'WEBHOOK')]) {
+                            discordSend description: SUMMARY_STATE,
+                                    footer: 'Job state: ' + currentBuild.currentResult,
+                                    link: env.BUILD_URL,
+                                    result: currentBuild.currentResult,
+                                    title: JOB_NAME,
+                                    webhookURL: WEBHOOK
+                        }
+                    } catch(any) { }
+                }
+            }
+            echo "#---- SUMMARY RESULTS OF TESTS ---------"
+            echo "# ${SUMMARY_STATE}"
+            echo "#---------------------------------------"
+        }
+        success {
+            echo 'POST SUCCESS'
+        }
+        unstable {
+            echo 'POST UNSTABLE'
+        }
+        failure {
+            echo 'POST FAILURE'
+            ConcatState(LAST_STAGE_NAME,"FAILURE")
+        }
+        changed {
+            echo 'POST CHANGED'
+        }
+    }
+}
