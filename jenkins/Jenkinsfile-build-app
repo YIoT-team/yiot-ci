@@ -77,7 +77,7 @@ pipeline    {
 				     string(credentialsId: 'android-keychain-passwd', variable: 'VS_KEYCHAIN_PASSWORD'), 
 				     string(credentialsId: 'android-key-passwd', variable: 'VS_KEY_PASSWORD')]) {
                 	sh "yiot/scripts/android-release.sh"				     
-                	sh "cp -f yiot/build/all/android-build/*.apk artifacts/
+                	sh "cp -f yiot/build/all/android-build/*.apk artifacts/"
 		    }
                     ConcatState(LAST_STAGE_NAME,"OK")                    
                 }
