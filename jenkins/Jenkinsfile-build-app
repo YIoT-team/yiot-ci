@@ -56,7 +56,7 @@ pipeline    {
                     LAST_STAGE_NAME="${STAGE_NAME}"
                     clearContentUnix()
                     checkout scm
-                    sh "mkdir -p artifacts"
+                    sh "mkdir -p artifacts/app/android"
                     checkout([$class: 'GitSCM',
                                       branches: [[name: '${YIOT_BRANCH}']],
                                       doGenerateSubmoduleConfigurations: false,
@@ -76,13 +76,27 @@ pipeline    {
 		    withCredentials([file(credentialsId: 'android-key', variable: 'VS_KEYCHAIN'), 
 				     string(credentialsId: 'android-keychain-passwd', variable: 'VS_KEYCHAIN_PASSWORD'), 
 				     string(credentialsId: 'android-key-passwd', variable: 'VS_KEY_PASSWORD')]) {
-                	sh "yiot/scripts/build/android-release.sh"
-                	sh "cp -f yiot/build/all/android-build/*.apk artifacts/"
+                	sh "export VS_KEYCHAIN=${VS_KEYCHAIN} VS_KEYCHAIN_PASSWORD=${VS_KEYCHAIN_PASSWORD} VS_KEY_PASSWORD=${VS_KEY_PASSWORD}; yiot/scripts/build/android-release.sh"
+                	sh "cp -f yiot/build/all/android-build/*.apk artifacts/app/android/"
+//                	sh "cp -f yiot/build/all/android-build/*.apk artifacts/app/android/"                	
 		    }
                     ConcatState(LAST_STAGE_NAME,"OK")                    
                 }
             }
         }
+
+
+        stage('Upload to cdn') {
+            steps {
+                script {
+                    LAST_STAGE_NAME="${STAGE_NAME}"
+                    print_info_header("Upload to cdn")
+                    sh "utils/push-artifacts.sh  artifacts/app/* app/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-app.log; exit \${PIPESTATUS[0]}"
+                    ConcatState(LAST_STAGE_NAME,"OK")
+                }
+            }
+        }
+
 
         stage('Archive artifacts') {
             steps {
