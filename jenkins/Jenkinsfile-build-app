@@ -76,7 +76,7 @@ pipeline    {
 		    withCredentials([file(credentialsId: 'android-key', variable: 'VS_KEYCHAIN'), 
 				     string(credentialsId: 'android-keychain-passwd', variable: 'VS_KEYCHAIN_PASSWORD'), 
 				     string(credentialsId: 'android-key-passwd', variable: 'VS_KEY_PASSWORD')]) {
-                	sh "export VS_KEYCHAIN=${VS_KEYCHAIN} VS_KEYCHAIN_PASSWORD=${VS_KEYCHAIN_PASSWORD} VS_KEY_PASSWORD=${VS_KEY_PASSWORD}; yiot/scripts/build/android-release.sh"
+                	sh "export VS_KEYCHAIN=${VS_KEYCHAIN} VS_KEYCHAIN_PASSWORD=${VS_KEYCHAIN_PASSWORD} VS_KEY_PASSWORD=${VS_KEY_PASSWORD} VS_KEY_ALIAS=key0; yiot/scripts/build/android-release.sh"
                 	sh "cp -f yiot/build/all/android-build/*.apk artifacts/app/android/"
 //                	sh "cp -f yiot/build/all/android-build/*.apk artifacts/app/android/"                	
 		    }
