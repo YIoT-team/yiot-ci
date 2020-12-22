@@ -13,6 +13,7 @@ if [ "${RET_RES}" == "0" ]; then
     echo "### ALL OPERATION DONE"
 else
     echo "### ERROR RES:[${RET_RES}]"
+    exit ${RET_RES}
 fi
 
 ############################################################################################
