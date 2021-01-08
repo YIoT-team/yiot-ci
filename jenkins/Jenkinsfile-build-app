@@ -72,15 +72,36 @@ pipeline    {
             steps {
                 script {
                     LAST_STAGE_NAME="${STAGE_NAME}"
+                    if ( BUILD_ANDROID == "true" ) {
                     print_info_header("Build Android apk")   
+                    sh "mkdir -p artifacts/app/android"
 		    withCredentials([file(credentialsId: 'android-key', variable: 'VS_KEYCHAIN'), 
 				     string(credentialsId: 'android-keychain-passwd', variable: 'VS_KEYCHAIN_PASSWORD'), 
 				     string(credentialsId: 'android-key-passwd', variable: 'VS_KEY_PASSWORD')]) {
-                	sh "export VS_KEYCHAIN=${VS_KEYCHAIN} VS_KEYCHAIN_PASSWORD=${VS_KEYCHAIN_PASSWORD} VS_KEY_PASSWORD=${VS_KEY_PASSWORD} VS_KEY_ALIAS=key0; yiot/scripts/build/android-release.sh"
-                	sh "cp -f yiot/build/all/android-build/*.apk artifacts/app/android/"
-                	sh "cp -f yiot/build/all/android-build/build/outputs/bundle/release/*.aab artifacts/app/android/yiot.aab"                	
+                	sh "export VS_KEYCHAIN=${VS_KEYCHAIN} VS_KEYCHAIN_PASSWORD=${VS_KEYCHAIN_PASSWORD} VS_KEY_PASSWORD=${VS_KEY_PASSWORD} VS_KEY_ALIAS=key0; yiot/scripts/build/android-release.sh 2>&1 | tee -a ${workspace}/artifacts/build-android.log; exit \${PIPESTATUS[0]}"
+                	sh "cp -f yiot/build/all/android-build/*.apk artifacts/app/android/ 2>&1 | tee -a ${workspace}/artifacts/build-android.log; exit \${PIPESTATUS[0]}"
+                	sh "cp -f yiot/build/all/android-build/build/outputs/bundle/release/*.aab artifacts/app/android/yiot.aab 2>&1 | tee -a ${workspace}/artifacts/build-android.log; exit \${PIPESTATUS[0]}"
 		    }
                     ConcatState(LAST_STAGE_NAME,"OK")                    
+                    } else  {
+			ConcatState(LAST_STAGE_NAME,"SKIPPED")
+                    }                    
+                }
+            }
+        }
+
+        stage('Building Linux') {
+            steps {
+                script {
+                    LAST_STAGE_NAME="${STAGE_NAME}"
+                    if ( BUILD_LINUX == "true" ) {
+                	print_info_header("Build Linux packages")   
+                	sh "mkdir -p artifacts/app/linux"
+                	sh "yiot/scripts/build/linux.sh 2>&1 | tee -a ${workspace}/artifacts/build-linux.log; exit \${PIPESTATUS[0]}"
+                	ConcatState(LAST_STAGE_NAME,"OK")                    
+                    } else  {
+			ConcatState(LAST_STAGE_NAME,"SKIPPED")
+                    }
                 }
             }
         }
