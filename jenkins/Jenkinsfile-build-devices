@@ -103,9 +103,8 @@ pipeline    {
                     if ( BUILD_RPI == "true" ) {                    
                 	print_info_header("Build linux binary")   
                 	sh "mkdir -p artifacts/devices/rpi"
-                	DockerRunner("jenkins/build-tool.sh -t linux", "build-linux.log")
-                	DockerRunner("jenkins/pkg/prep-pkg.sh /home/build/yiot", "build-linux.log")
-                	DockerRunner("cp -f jenkins/pkg/build/sdeb/*.deb artifacts/devices/rpi", "build-linux.log")                    
+                	DockerRunner("yiot/scripts/build/build-tool.sh dev-rpi", "build-linux.log")
+                	DockerRunner("cp -f yiot/build-pkgs/dev/deb/yiot-rpi/*_armhf.deb artifacts/devices/rpi", "build-linux.log")                    
                 	ConcatState(LAST_STAGE_NAME,"OK")                    
                     } else  {
             		ConcatState(LAST_STAGE_NAME,"SKIPPED")
