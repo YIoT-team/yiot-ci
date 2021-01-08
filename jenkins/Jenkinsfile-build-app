@@ -97,7 +97,9 @@ pipeline    {
                     if ( BUILD_LINUX == "true" ) {
                 	print_info_header("Build Linux packages")   
                 	sh "mkdir -p artifacts/app/linux"
-                	sh "yiot/scripts/build/linux.sh 2>&1 | tee -a ${workspace}/artifacts/build-linux.log; exit \${PIPESTATUS[0]}"
+                	sh "yiot/scripts/build/build-tool.sh app-linux 2>&1 | tee -a ${workspace}/artifacts/build-linux.log; exit \${PIPESTATUS[0]}"
+                	sh "cp -f yiot/build-pkgs/app/deb/yiot-app/*_amd64.deb artifacts/app/linux 2>&1 | tee -a ${workspace}/artifacts/build-linux.log; exit \${PIPESTATUS[0]}"                	
+                	sh "cp -f yiot/build-pkgs/app/rpm/yiot-app/*.x86_64.rpm artifacts/app/linux 2>&1 | tee -a ${workspace}/artifacts/build-linux.log; exit \${PIPESTATUS[0]}"                	                	
                 	ConcatState(LAST_STAGE_NAME,"OK")                    
                     } else  {
 			ConcatState(LAST_STAGE_NAME,"SKIPPED")
@@ -105,7 +107,6 @@ pipeline    {
                 }
             }
         }
-
 
         stage('Upload to cdn') {
             steps {
