@@ -162,7 +162,7 @@ pipeline    {
         always {
             print_info_header("Report")
             script {
-                ConcatState("","\n  URL: ftp://cdn.yiot-dev.io/pub/images/${BUILD_NUMBER}/")
+                ConcatState("","\n  URL: http://cdn.yiot-dev.io:88/images/${BUILD_NUMBER}/")
                 // Send message to Discord
                 if ( DISKORD_NOTIFY == "true" ) {
                     try {
