@@ -117,7 +117,7 @@ pipeline    {
                 	print_info_header("Build Windows")   
                 	sh "mkdir -p artifacts/app/windows"
                 	sh "yiot/scripts/build/build-tool.sh app-windows 2>&1 | tee -a ${workspace}/artifacts/build-windows.log; exit \${PIPESTATUS[0]}"
-                	sh "cp -f yiot/build-pkgs/app/deb/yiot-app/yiot-installer*.exe artifacts/app/windows 2>&1 | tee -a ${workspace}/artifacts/build-windows.log; exit \${PIPESTATUS[0]}"                	
+                	sh "cp -f yiot/build/yiot-installer*.exe artifacts/app/windows 2>&1 | tee -a ${workspace}/artifacts/build-windows.log; exit \${PIPESTATUS[0]}"                	
                 	ConcatState(LAST_STAGE_NAME,"OK")                    
                     } else  {
 			ConcatState(LAST_STAGE_NAME,"SKIPPED")
