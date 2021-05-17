@@ -144,6 +144,8 @@ pipeline    {
                 	sh "mkdir -p artifacts/app/macos"
                 	sh ". ~/.bashrc; yiot/scripts/build/build-tool.sh app-macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
                 	sh "cp -f yiot/build/*.dmg artifacts/app/macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
+                        print_info_header("Upload to cdn")
+                        sh "utils/push-artifacts.sh  artifacts/app/ app/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-app.log; exit \${PIPESTATUS[0]}"                	
                 	ConcatState(LAST_STAGE_NAME,"OK")                    
                     } else  {
 			ConcatState(LAST_STAGE_NAME,"SKIPPED")
