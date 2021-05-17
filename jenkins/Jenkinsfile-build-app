@@ -134,10 +134,16 @@ pipeline    {
                     if ( BUILD_MACOS == "true" ) {
                         clearContentUnix()
                         checkout scm
+                        checkout([$class: 'GitSCM',
+                                      branches: [[name: '${YIOT_BRANCH}']],
+                                      doGenerateSubmoduleConfigurations: false,
+                                      extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false],[$class: 'RelativeTargetDirectory', relativeTargetDir: 'yiot']],
+                                      submoduleCfg: [],
+                                      userRemoteConfigs: [[credentialsId: 'yiot-bot', url: 'https://github.com/YIoT-team/YIoT.git']]])
                 	print_info_header("Build MacOS")
                 	sh "mkdir -p artifacts/app/macos"
                 	sh "yiot/scripts/build/build-tool.sh app-macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
-                	sh "cp -f yiot/build/*.dmg artifacts/app/macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"                	
+                	sh "cp -f yiot/build/*.dmg artifacts/app/macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
                 	ConcatState(LAST_STAGE_NAME,"OK")                    
                     } else  {
 			ConcatState(LAST_STAGE_NAME,"SKIPPED")
