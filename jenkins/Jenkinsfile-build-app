@@ -142,7 +142,7 @@ pipeline    {
                                       userRemoteConfigs: [[credentialsId: 'yiot-bot', url: 'https://github.com/YIoT-team/YIoT.git']]])
                 	print_info_header("Build MacOS")
                 	sh "mkdir -p artifacts/app/macos"
-                	sh "yiot/scripts/build/build-tool.sh app-macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
+                	sh ". ~/.bashrc; yiot/scripts/build/build-tool.sh app-macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
                 	sh "cp -f yiot/build/*.dmg artifacts/app/macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
                 	ConcatState(LAST_STAGE_NAME,"OK")                    
                     } else  {
