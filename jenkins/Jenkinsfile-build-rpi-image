@@ -97,7 +97,13 @@ pipeline    {
                     print_info_header("Unzip image")   
                     sh "cd build ; unzip *.zip  2>&1 | tee -a ${workspace}/artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}"
                     print_info_header("Installing pkgs")   
-                    sh "DEB_PKG=\$(ls build/artifacts/devices/rpi/*.deb|grep -v dbgsym); RPI_IMG=\$(ls build/*.img); sudo utils/rpi-imager.sh install -e -i \${RPI_IMG} -p \${DEB_PKG}  2>&1 | tee -a ${workspace}/artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}"
+                    sh '''
+                          DEB_PKG=\$(ls build/artifacts/devices/rpi/*.deb|grep -v dbgsym) 
+                          RPI_IMG=\$(ls build/*.img) 
+                          sudo rpi-imager.sh exec -c \"echo \'iptables-persistent iptables-persistent/autosave_v4 boolean true\' | sudo debconf-set-selections\"  2>&1 | tee -a ${workspace}/artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}
+                          sudo rpi-imager.sh exec -c \"echo \'iptables-persistent iptables-persistent/autosave_v6 boolean true\' | sudo debconf-set-selections\"  2>&1 | tee -a ${workspace}/artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}
+                          sudo utils/rpi-imager.sh install -e -i \${RPI_IMG} -p \${DEB_PKG}  2>&1 | tee -a ${workspace}/artifacts/rebuild-image.log; exit \${PIPESTATUS[0]}
+                       '''
                     ConcatState(LAST_STAGE_NAME,"OK")                    
                 }
             }
