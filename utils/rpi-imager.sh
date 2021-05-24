@@ -333,7 +333,7 @@ cmd_install() {
 	mkdir -p "${SCRIPT_DIRECTORY}/mnt/root/pkg"
 	cp -f "${ARG_PACKAGE}" "${SCRIPT_DIRECTORY}/mnt/root/pkg"
 	PACKAGE_NAME="$(basename ${ARG_PACKAGE})"
-	exec_nspawn "apt-get -y update && dpkg -i /root/pkg/${PACKAGE_NAME}; apt-get install -f"	
+	exec_nspawn "apt-get -y update && dpkg -i /root/pkg/${PACKAGE_NAME}; apt-get install -f -y"	
 	local RET_RES="${?}"
 	rm -rf "${SCRIPT_DIRECTORY}/mnt/root/pkg"
 	if [ "${RET_RES}" != "0" ] && [ "${IGNORE_ERR}" != "1" ]; then 
