@@ -144,7 +144,7 @@ pipeline    {
                 	sh "mkdir -p artifacts/app/macos"
 
                     withCredentials([usernamePassword(credentialsId: 'jenkins-mac', passwordVariable: 'MAC_PASSWD', usernameVariable: 'MAC_USER')]) {
-                        sh ". ~/.bashrc; security unlock-keychain -p ${MAC_PASSWD} login.keychain; yiot/scripts/build/build-tool.sh app-macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
+                        sh ". ~/.bashrc; security unlock-keychain -p ${MAC_PASSWD} login.keychain; yiot/scripts/build/build-tool.sh app-macos -u ${MAC_USER} -w ${MAC_PASSWD} -i 7FD87844FA13BF5FCA51E9D32D0829BA632BF1EC 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
                     }        
                 	sh "cp -f yiot/build/*.dmg artifacts/app/macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
                         print_info_header("Upload to cdn")
