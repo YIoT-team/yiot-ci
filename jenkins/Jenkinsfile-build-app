@@ -126,36 +126,36 @@ pipeline    {
             }
         }
 
-        stage('Building MacOS') {
-          agent { label "jenkins-mac" }
-            steps {
-                script {
-                    LAST_STAGE_NAME="${STAGE_NAME}"
-                    if ( BUILD_MACOS == "true" ) {
-                        clearContentUnix()
-                        checkout scm
-                        checkout([$class: 'GitSCM',
-                                      branches: [[name: '${YIOT_BRANCH}']],
-                                      doGenerateSubmoduleConfigurations: false,
-                                      extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false],[$class: 'RelativeTargetDirectory', relativeTargetDir: 'yiot']],
-                                      submoduleCfg: [],
-                                      userRemoteConfigs: [[credentialsId: 'yiot-bot', url: 'https://github.com/YIoT-team/YIoT.git']]])
-                	print_info_header("Build MacOS")
-                	sh "mkdir -p artifacts/app/macos"
+        // stage('Building MacOS') {
+        //   agent { label "jenkins-mac" }
+        //     steps {
+        //         script {
+        //             LAST_STAGE_NAME="${STAGE_NAME}"
+        //             if ( BUILD_MACOS == "true" ) {
+        //                 clearContentUnix()
+        //                 checkout scm
+        //                 checkout([$class: 'GitSCM',
+        //                               branches: [[name: '${YIOT_BRANCH}']],
+        //                               doGenerateSubmoduleConfigurations: false,
+        //                               extensions: [[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false],[$class: 'RelativeTargetDirectory', relativeTargetDir: 'yiot']],
+        //                               submoduleCfg: [],
+        //                               userRemoteConfigs: [[credentialsId: 'yiot-bot', url: 'https://github.com/YIoT-team/YIoT.git']]])
+        //         	print_info_header("Build MacOS")
+        //         	sh "mkdir -p artifacts/app/macos"
 
-                    withCredentials([usernamePassword(credentialsId: 'jenkins-mac', passwordVariable: 'MAC_PASSWD', usernameVariable: 'MAC_USER')]) {
-                        sh ". ~/.bashrc; security unlock-keychain -p ${MAC_PASSWD} login.keychain; yiot/scripts/build/build-tool.sh app-macos -u ${MAC_USER} -w ${MAC_PASSWD} -i 7FD87844FA13BF5FCA51E9D32D0829BA632BF1EC 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
-                    }        
-                	sh "cp -f yiot/build/*.dmg artifacts/app/macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
-                        print_info_header("Upload to cdn")
-                        sh "utils/push-artifacts.sh  artifacts/app/ app/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-app.log; exit \${PIPESTATUS[0]}"                	
-                	ConcatState(LAST_STAGE_NAME,"OK")                    
-                    } else  {
-			ConcatState(LAST_STAGE_NAME,"SKIPPED")
-                    }
-                }
-            }
-        }
+        //             withCredentials([usernamePassword(credentialsId: 'jenkins-mac', passwordVariable: 'MAC_PASSWD', usernameVariable: 'MAC_USER')]) {
+        //                 sh ". ~/.bashrc; security unlock-keychain -p ${MAC_PASSWD} login.keychain; yiot/scripts/build/build-tool.sh app-macos -u ${MAC_USER} -w ${MAC_PASSWD} -i 7FD87844FA13BF5FCA51E9D32D0829BA632BF1EC 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
+        //             }        
+        //         	sh "cp -f yiot/build/*.dmg artifacts/app/macos 2>&1 | tee -a ${workspace}/artifacts/build-macos.log; exit \${PIPESTATUS[0]}"
+        //                 print_info_header("Upload to cdn")
+        //                 sh "utils/push-artifacts.sh  artifacts/app/ app/${env.BUILD_NUMBER}/  2>&1 | tee -a ${workspace}/artifacts/upload-app.log; exit \${PIPESTATUS[0]}"                	
+        //         	ConcatState(LAST_STAGE_NAME,"OK")                    
+        //             } else  {
+		// 	ConcatState(LAST_STAGE_NAME,"SKIPPED")
+        //             }
+        //         }
+        //     }
+        // }
 
 
         stage('Upload to cdn') {
